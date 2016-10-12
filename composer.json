@@ -1,0 +1,19 @@
+{
+    "name": "matt/wp-installer",
+    "description": "WP Installer CLI Command",
+    "homepage": "https://github.com/mattgrshaw/wp-installer",
+    "support": {
+        "issues": "https://github.com/mattgrshaw/wp-installer"
+    },
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Matt Shaw",
+            "email": "matt@expandedfronts.com"
+        }
+    ],
+    "autoload": {
+        "files": [ "installer.php" ]
+    },
+    "require": {}
+}
