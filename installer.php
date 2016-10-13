@@ -6,7 +6,7 @@
  */
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	WP_CLI::add_command( 'installer', 'WP_CLI_Installer' );
+	WP_CLI::add_command( 'installer', 'WP_CLI_Installer', array( 'when' => 'before_wp_load' ) );
 }
 
 /**
@@ -57,7 +57,7 @@ class WP_CLI_Installer {
 	 * : Admin email
 	 */
 	public function install( $args, $assoc_args ) {
-		$path   = trailingslashit( $assoc_args['site_base_path'] ) . $args[0];
+		$path   = $assoc_args['site_base_path'] . $args[0];
 		$dbuser = $assoc_args['dbuser'];
 		$dbpass = $assoc_args['dbpass'];
 		$dbhost = $assoc_args['dbhost'];
@@ -104,7 +104,7 @@ class WP_CLI_Installer {
 	 * : The site that should be uninstalled.
 	 */
 	public function uninstall( $args, $assoc_args ) {
-		$path = trailingslashit( $assoc_args['site_base_path'] ) . $args[0];
+		$path = $assoc_args['site_base_path'] . $args[0];
 
 		// Let's make sure we really want to do this
 		WP_CLI::confirm( 'Are you sure you want to proceed? Data WILL be lost!', $assoc_args );
