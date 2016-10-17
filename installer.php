@@ -58,7 +58,7 @@ class WP_CLI_Installer {
 	 */
 	public function install( $args, $assoc_args ) {
 		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
-		$site_path = $assoc_args['base_path'] . '/' . $args[0];
+		$site_path = $base_path . '/' . $args[0];
 		$dbuser    = $assoc_args['dbuser'];
 		$dbpass    = $assoc_args['dbpass'];
 		$dbhost    = $assoc_args['dbhost'];
@@ -109,7 +109,7 @@ class WP_CLI_Installer {
 	 */
 	public function uninstall( $args, $assoc_args ) {
 		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
-		$site_path = $assoc_args['base_path'] . '/' . $args[0];
+		$site_path = $base_path . '/' . $args[0];
 
 		// Let's make sure we really want to do this
 		if ( ! isset( $assoc_args['yes'] ) ) {
