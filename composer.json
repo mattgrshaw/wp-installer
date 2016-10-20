@@ -1,6 +1,7 @@
 {
     "name": "matt/wp-installer",
     "description": "WP Installer CLI Command",
+    "type": "wp-cli-package",
     "homepage": "https://github.com/mattgrshaw/wp-installer",
     "support": {
         "issues": "https://github.com/mattgrshaw/wp-installer"
