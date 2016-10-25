@@ -1,6 +1,6 @@
 {
     "name": "matt/wp-installer",
-    "description": "WP Installer CLI Command",
+    "description": "Simple commands to install and uninstall WordPress",
     "homepage": "https://github.com/mattgrshaw/wp-installer",
     "support": {
         "issues": "https://github.com/mattgrshaw/wp-installer"
@@ -15,5 +15,11 @@
     "autoload": {
         "files": [ "installer.php" ]
     },
-    "require": {}
+    "require": {},
+    "extra": {
+        "commands": [
+            "installer install",
+            "installer uninstall"
+        ]
+    }
 }
