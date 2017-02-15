@@ -15,5 +15,8 @@
     "autoload": {
         "files": [ "installer.php" ]
     },
-    "require": {}
+    "require": {},
+    "require-dev": {
+        "behat/behat": "~2.5"
+    }
 }
