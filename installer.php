@@ -55,6 +55,9 @@ class WP_CLI_Installer {
 	 *
 	 * [--admin_email]
 	 * : Admin email
+	 *
+	 * [--after_script]
+	 * : Custom script to run after install
 	 */
 	public function install( $args, $assoc_args ) {
 		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
@@ -62,6 +65,7 @@ class WP_CLI_Installer {
 		$dbuser    = $assoc_args['dbuser'];
 		$dbpass    = $assoc_args['dbpass'];
 		$dbhost    = $assoc_args['dbhost'];
+		$dbname    = str_replace( '.', '_', $args[0] );
 
 		// Download WordPress
 		$download = "wp core download --path=%s";
@@ -91,7 +95,11 @@ class WP_CLI_Installer {
 
 		$core_install = "wp --path=%s core %s --url=%s --title=%s --admin_user=%s --admin_password=%s --admin_email=%s";
 		WP_CLI::log( 'Installing WordPress...' );
-		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( $core_install, $site_path, $subcommand, $base_url . $args[0], $args[0], $admin_user, $admin_pass, $admin_email ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( $core_install, $site_path, $subcommand, 'http://' . $args[0], $args[0], $admin_user, $admin_pass, $admin_email ) );
+
+		if ( isset( $assoc_args['after_script'] ) ) {
+			WP_CLI::launch( $assoc_args['after_script'] . ' ' . $args[0] . '&>/dev/null' );
+		}
 
 		WP_CLI::success( "WordPress installed at $site_path" );
 	}
@@ -106,6 +114,9 @@ class WP_CLI_Installer {
 	 *
 	 * [--base_path=<path>]
 	 * : Base path that all sites are installed in
+	 *
+	 * [--after-script]
+	 * : A custom script to run after the uninstall.
 	 */
 	public function uninstall( $args, $assoc_args ) {
 		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
@@ -126,7 +137,76 @@ class WP_CLI_Installer {
 		WP_CLI::log( 'Removing files...' );
 		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( $remove_files, $site_path ) );
 
+		if ( isset( $assoc_args['after-script'] ) ) {
+			WP_CLI::launch( $assoc_args['after-script'] . ' ' . $args[0] . '&>/dev/null' );
+		}
+
 		WP_CLI::success( "Uninstalled WordPress from $site_path" );
+	}
+
+	/**
+	 * Cleanup any unnecessary data after install.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <dest>
+	 * : The site to clean up
+	 *
+	 * [--after_script]
+	 * : A custom script to run after the cleanup.
+	 */
+	public function cleanup( $args, $assoc_args ) {
+		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
+		$site_path = $base_path . '/' . $args[0];
+
+		WP_CLI::log( 'Removing extra themes...' );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s theme delete twentyfifteen', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s theme delete twentysixteen', $site_path ) );
+
+		WP_CLI::log( 'Removing default plugins...' );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s plugin delete hello', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s plugin delete akismet', $site_path ) );
+
+		WP_CLI::log( 'Removing sample data...' );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_posts"', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_postmeta"', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_comments"', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_commentmeta"', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s user meta update 1 show_welcome_panel "0"', $site_path ) );
+
+		if ( isset( $assoc_args['after_script'] ) ) {
+			WP_CLI::launch( $assoc_args['after_script'] . ' ' . $args[0] . '&>/dev/null' );
+		}
+	}
+
+	/**
+	 * Add plugins from the provided file.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <dest>
+	 * : The site to add plugins to.
+	 *
+	 * [--plugin_list]
+	 * : The path to the file containing the list of plugins to install.
+	 */
+	public function add_plugins( $args, $assoc_args ) {
+		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
+
+		if ( isset( $assoc_args['plugin_list'] ) && file_exists( $assoc_args['plugin_list'] ) ) {
+			$plugins = file_get_contents( $assoc_args['plugin_list'] );
+			$plugins = array_filter( explode( PHP_EOL, $plugins ) );
+
+			foreach ( $plugins as $plugin ) {
+				$cmd = 'wp --path=%s plugin install %s';
+				$cmd = \WP_CLI\Utils\esc_cmd( $cmd, $base_path . '/' . $args[0], $plugin );
+				$result = WP_CLI::launch( $cmd, false, true );
+				WP_CLI::log( $result );
+
+			}
+		} else {
+			WP_CLI::log( 'Plugin list not found' );
+		}
 	}
 
 }
