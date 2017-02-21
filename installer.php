@@ -75,7 +75,7 @@ class WP_CLI_Installer {
  		// Create the wp-config file
  		$config = "wp --path=%s core config --dbname=%s --dbuser=%s --dbpass=%s --dbhost=%s";
  		WP_CLI::log( 'Creating wp-config.php...' );
-    	WP_CLI::launch( \WP_CLI\Utils\esc_cmd( $config, $site_path, $args[0], $dbuser, $dbpass, $dbhost ) );
+    	WP_CLI::launch( \WP_CLI\Utils\esc_cmd( $config, $site_path, $dbname, $dbuser, $dbpass, $dbhost ) );
 
 		// Create the database
 		$db_create = "wp --path=%s db create";
@@ -168,10 +168,7 @@ class WP_CLI_Installer {
 		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s plugin delete akismet', $site_path ) );
 
 		WP_CLI::log( 'Removing sample data...' );
-		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_posts"', $site_path ) );
-		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_postmeta"', $site_path ) );
-		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_comments"', $site_path ) );
-		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_commentmeta"', $site_path ) );
+		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s db query "TRUNCATE TABLE wp_posts; TRUNCATE TABLE wp_postmeta; TRUNCATE TABLE wp_comments; TRUNCATE TABLE wp_commentmeta;"', $site_path ) );
 		WP_CLI::launch( \WP_CLI\Utils\esc_cmd( 'wp --path=%s user meta update 1 show_welcome_panel "0"', $site_path ) );
 
 		if ( isset( $assoc_args['after_script'] ) ) {
