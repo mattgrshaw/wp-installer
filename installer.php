@@ -190,19 +190,19 @@ class WP_CLI_Installer {
 	public function add_plugins( $args, $assoc_args ) {
 		$base_path = isset( $assoc_args['base_path'] ) ? $assoc_args['base_path'] : getcwd();
 
-		if ( isset( $assoc_args['plugin_list'] ) && file_exists( $assoc_args['plugin_list'] ) ) {
-			$plugins = file_get_contents( $assoc_args['plugin_list'] );
-			$plugins = array_filter( explode( PHP_EOL, $plugins ) );
-
-			foreach ( $plugins as $plugin ) {
-				$cmd = 'wp --path=%s plugin install %s';
-				$cmd = \WP_CLI\Utils\esc_cmd( $cmd, $base_path . '/' . $args[0], $plugin );
-				$result = WP_CLI::launch( $cmd, false, true );
-				WP_CLI::log( $result );
-
-			}
-		} else {
+		if ( ! isset( $assoc_args['plugin_list'] ) || ! file_exists( $assoc_args['plugin_list'] ) ) {
 			WP_CLI::log( 'Plugin list not found' );
+			return;
+		}
+
+		$plugins = file_get_contents( $assoc_args['plugin_list'] );
+		$plugins = array_filter( explode( PHP_EOL, $plugins ) );
+
+		foreach ( $plugins as $plugin ) {
+			$cmd = 'wp --path=%s plugin install %s';
+			$cmd = \WP_CLI\Utils\esc_cmd( $cmd, $base_path . '/' . $args[0], $plugin );
+			$result = WP_CLI::launch( $cmd, false, true );
+			WP_CLI::log( $result );
 		}
 	}
 
